@@ -72,6 +72,11 @@ gaiacli keys test --home ibc1/n0/gaiacli n1 "$(jq -r '.secret' ibc1/n0/gaiacli/k
 echo "\n\nKeys should match:\n\n"
 
 SENDER=$(gaiacli --home ibc0/n0/gaiacli keys list | jq '.[0].address')
+echo $(gaiacli --home ibc0/n0/gaiacli keys list | jq '.[0].address')
+echo $SENDER
+
+RECIPIENT=$(gaiacli --home ibc0/n0/gaiacli keys list | jq '.[1].address')
+echo $RECIPIENT
 
 gaiacli --home ibc0/n0/gaiacli keys list | jq '.[].address'
 gaiacli --home ibc1/n0/gaiacli keys list | jq '.[].address'
@@ -186,12 +191,14 @@ sleep 5
 
 echo "Submitting Burn Proof"
 
-PROOF='{"version":2,"vin":"01f1f1f1765c2da15edd834dc8a8f05d5bdea937af98f8f9994d9afe425baeaab60b00000017160014f82b0900a958d319c81622fdcb674f3b635a0261fdffffff","vout":"0121030000000000001976a914759d6677091e973b9e9d99f19c68fbf43e3f05f988ac","locktime":602029,"tx_id":"c419a98ac429e747a4ea5a993d8b5dde6a993dc608094d4c60a5d08fc54b25b5","tx_id_le":"b5254bc58fd0a5604c4d0908c63d996ade5d8b3d995aeaa447e729c48aa919c4","index":1531,"confirming_header":{"raw":"00000020bbe25e837ff2dbb7048688e5470c20b4dc88b3796afb11000000000000000000f6eb5a74be96c8c759b74c14e4781d6069383de7748f48aa2293ffa61dc3ef78b22dbe5ddf8e1417f9765c1c00","hash":"5ad173b0c1d239471539b8f490e1ea330967eb758e5111000000000000000000","hash_le":"00000000000000000011518e75eb670933eae190f4b839154739d2c1b073d15a","height":602115,"prevhash":"bbe25e837ff2dbb7048688e5470c20b4dc88b3796afb11000000000000000000","merkle_root":"f6eb5a74be96c8c759b74c14e4781d6069383de7748f48aa2293ffa61dc3ef78","merkle_root_le":"78efc31da6ff9322aa488f74e73d3869601d78e4144cb759c7c896be745aebf6"},"intermediate_nodes":"b3026e5397de8e15a9fd009b407b5e4c30989dfd0ef788c2e1dfd65786cf0a9a"}'
+PROOF=' {"version":"0x02000000","vin":"01f1f1f1765c2da15edd834dc8a8f05d5bdea937af98f8f9994d9afe425baeaab60b00000017160014f82b0900a958d319c81622fdcb674f3b635a0261fdffffff","vout":"0121030000000000001976a914759d6677091e973b9e9d99f19c68fbf43e3f05f988ac","locktime":"0xad2f0900","tx_id":"c419a98ac429e747a4ea5a993d8b5dde6a993dc608094d4c60a5d08fc54b25b5","tx_id_le":"b5254bc58fd0a5604c4d0908c63d996ade5d8b3d995aeaa447e729c48aa919c4","index":1531,"confirming_header":{"raw":"00000020bbe25e837ff2dbb7048688e5470c20b4dc88b3796afb11000000000000000000f6eb5a74be96c8c759b74c14e4781d6069383de7748f48aa2293ffa61dc3ef78b22dbe5ddf8e1417f9765c1c","hash_le":"5ad173b0c1d239471539b8f490e1ea330967eb758e5111000000000000000000","hash":"00000000000000000011518e75eb670933eae190f4b839154739d2c1b073d15a","height":602115,"prevhash":"00000000000000000011fb6a79b388dcb4200c47e5888604b7dbf27f835ee2bb","merkle_root_le":"f6eb5a74be96c8c759b74c14e4781d6069383de7748f48aa2293ffa61dc3ef78","merkle_root":"78efc31da6ff9322aa488f74e73d3869601d78e4144cb759c7c896be745aebf6"},"intermediate_nodes":"b3026e5397de8e15a9fd009b407b5e4c30989dfd0ef788c2e1dfd65786cf0a9ad69e796c77fc5c5715c5d57b5307b5623d99898405456af6f86588be6fcf9a61d4423dc9d541b00161e9573cdd5a683456f56a01a47c3cc3d5f07f3d2ae92c195bd4b26f3265c17a813217a55a02bb01fcef189d1d399ab19aa911824a1ed9aa3c34127e90aafbaebc4ce00a504a4514e2a749c6027bbbd2327933c5addcbd5430dbc5733c10d60b3ac6ec8d510b5bb1f6c4538846131f53334e0f5d57da26e9ae86184271d70de59b9e1f66eb6b213e8fa560b74435f0d3043fc81eb219ab84458c5c9c222cc13de0579b6f56e62774d68cab9b7910832f376caa4dc9aaaf86d63003e031b02afb660e423c78f13bd4d01d154c6326554ae14770856f49946460e6c8debfe74dd80332b644a1a32980993186b6e9c77038d6b87a0e6e6bed4bdb136d749ac34e6af586a50e1c82ef7494524275e239bcde3107a9d33a726be1"}'
 
 BURNPROOF='{"proof": '
-BURNPROOF+=$PROOF
-BURNPROOF+=', "headers": [], "sender": '
-BURNPROOF+=$SENDER
+BURNPROOF+="$PROOF"
+BURNPROOF+=', "headers": [], "signer": '
+BURNPROOF+="$SENDER"
+BURNPROOF+=', "recipient": '
+BURNPROOF+=$RECIPIENT
 BURNPROOF+='}'
 
 echo "\n\n\n"
@@ -199,9 +206,10 @@ echo $BURNPROOF
 echo "\n\n\n"
 
 gaiacli \
-    tx burn burnproof $BURNPROOF \
+    tx burn burnproof "$BURNPROOF" \
     --home ibc0/n0/gaiacli \
-    --from n0
+    --from n0 \
+    --node tcp://localhost:26657
 
 echo "Trying to receive again"
 
