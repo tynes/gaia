@@ -29,6 +29,6 @@ require (
 	google.golang.org/genproto v0.0.0-20190801165951-fa694d86fc64 // indirect
 )
 
-replace github.com/summa-tx/burning-bitcoin/golang => /home/james/devel/burning-bitcoin/golang
+replace github.com/summa-tx/burning-bitcoin/golang => /home/tynes/golang/src/github.com/summa-tx/burning-bitcoin/golang
 
 replace github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.34.4-0.20191102053406-d1f6c30cc5ee

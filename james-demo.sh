@@ -1,6 +1,6 @@
-#!/bin/zsh
+#!/bin/bash
 
-GAIA_BRANCH=james-do-thing
+GAIA_BRANCH=mark-do-thing
 GAIA_DIR=$(mktemp -d)
 CONF_DIR=$(mktemp -d)
 
@@ -20,7 +20,7 @@ set -e
 echo "Building Gaia..."
 
 cd $GAIA_DIR
-git clone git@github.com:prestwich/gaia
+git clone git@github.com:tynes/gaia
 cd gaia
 git checkout $GAIA_BRANCH
 make install
