@@ -30,16 +30,19 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/supply"
+
+	"github.com/summa-tx/burning-bitcoin/golang/x/burn"
+
 )
 
 const appName = "GaiaApp"
 
 var (
-	// default home directories for gaiacli
-	DefaultCLIHome = os.ExpandEnv("$HOME/.gaiacli")
+	// DefaultCLIHome is default home directories for the application CLI
+	DefaultCLIHome = os.ExpandEnv("$HOME/.summa/burn-baby-burn")
 
-	// default home directories for gaiad
-	DefaultNodeHome = os.ExpandEnv("$HOME/.gaiad")
+	// DefaultNodeHome sets the folder where the applcation data and configuration will be stored
+	DefaultNodeHome = os.ExpandEnv("$HOME/.summa/burn-baby-burn/config")
 
 	// The module BasicManager is in charge of setting up basic,
 	// non-dependant module elements, such as codec registration
@@ -57,6 +60,7 @@ var (
 		slashing.AppModuleBasic{},
 		supply.AppModuleBasic{},
 		ibc.AppModuleBasic{},
+		burn.AppModule{},
 	)
 
 	// module account permissions
@@ -109,6 +113,8 @@ type GaiaApp struct {
 	paramsKeeper   params.Keeper
 	ibcKeeper      ibc.Keeper
 
+	burnKeeper	 burn.Keeper
+
 	// the module manager
 	mm *module.Manager
 
@@ -131,7 +137,7 @@ func NewGaiaApp(
 	keys := sdk.NewKVStoreKeys(
 		bam.MainStoreKey, auth.StoreKey, staking.StoreKey,
 		supply.StoreKey, mint.StoreKey, distr.StoreKey, slashing.StoreKey,
-		gov.StoreKey, params.StoreKey, ibc.StoreKey,
+		gov.StoreKey, params.StoreKey, ibc.StoreKey, burn.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(staking.TStoreKey, params.TStoreKey)
 
@@ -169,6 +175,10 @@ func NewGaiaApp(
 	)
 	app.crisisKeeper = crisis.NewKeeper(crisisSubspace, invCheckPeriod, app.supplyKeeper, auth.FeeCollectorName)
 
+	app.burnKeeper = burn.NewKeeper(
+		keys[burn.StoreKey],
+		app.cdc,
+	)
 	// register the proposal types
 	govRouter := gov.NewRouter()
 	govRouter.AddRoute(gov.RouterKey, gov.ProposalHandler).
@@ -193,6 +203,7 @@ func NewGaiaApp(
 		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx),
 		auth.NewAppModule(app.accountKeeper),
 		bank.NewAppModule(app.bankKeeper, app.accountKeeper),
+		burn.NewAppModule(app.burnKeeper, app.ibcKeeper),
 		crisis.NewAppModule(&app.crisisKeeper),
 		supply.NewAppModule(app.supplyKeeper, app.accountKeeper),
 		distr.NewAppModule(app.distrKeeper, app.supplyKeeper),
@@ -234,7 +245,6 @@ func NewGaiaApp(
 		distr.NewAppModule(app.distrKeeper, app.supplyKeeper),
 		staking.NewAppModule(app.stakingKeeper, app.accountKeeper, app.supplyKeeper),
 		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
-		// TODO: ibc simulations
 	)
 
 	app.sm.RegisterStoreDecoders()

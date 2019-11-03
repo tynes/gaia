@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/btcsuite/btcd v0.0.0-20190807005414-4063feeff79a // indirect
-	github.com/cosmos/cosmos-sdk v0.34.4-0.20191102053406-d1f6c30cc5ee
+	github.com/cosmos/cosmos-sdk v0.37.3
 	github.com/cosmos/go-bip39 v0.0.0-20180819234021-555e2067c45d // indirect
 	github.com/golang/mock v1.3.1 // indirect
 	github.com/onsi/ginkgo v1.8.0 // indirect
@@ -19,6 +19,7 @@ require (
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.4.0
 	github.com/stretchr/testify v1.4.0
+	github.com/summa-tx/burning-bitcoin/golang v0.0.0-00010101000000-000000000000
 	github.com/tendermint/go-amino v0.15.1
 	github.com/tendermint/tendermint v0.32.6
 	github.com/tendermint/tm-db v0.2.0
@@ -27,3 +28,7 @@ require (
 	golang.org/x/text v0.3.2 // indirect
 	google.golang.org/genproto v0.0.0-20190801165951-fa694d86fc64 // indirect
 )
+
+replace github.com/summa-tx/burning-bitcoin/golang => /home/james/devel/burning-bitcoin/golang
+
+replace github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.34.4-0.20191102053406-d1f6c30cc5ee
